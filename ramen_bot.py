@@ -30,7 +30,7 @@ async def on_message(message):
     print(f"受信メッセージ: {message.content}")
 
     # 🏷️ **「{ユーザー名} さん下げて」の処理**
-    match = re.match(r"^([\w\.-]+)\s+さん下げて$", message.content)
+    match = re.match(r"^([\w\.-]+)さん下げて$", message.content)
     if match:
         target_user = match.group(1).strip()  # 指定されたユーザー名
         print(f"ターゲットユーザー（指定）: {target_user}")  # デバッグ用出力
