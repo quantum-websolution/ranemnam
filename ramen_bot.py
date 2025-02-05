@@ -1,3 +1,27 @@
+import discord
+from discord.ext import commands
+import sqlite3
+import os
+import re
+from dotenv import load_dotenv
+
+# 環境変数をロード
+load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
+
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+# データベースの初期設定
+def init_db():
+    with sqlite3.connect("ramen.db") as conn:
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS ramen_log (user TEXT, count INTEGER)''')
+        conn.commit()
+
+init_db()
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -6,7 +30,7 @@ async def on_message(message):
     user = message.author.name  
     user_mention = message.author.mention  
 
-    # 🔹「さん下げて」コマンドの処理（別途処理）
+    # 🔹「さん下げて」コマンドの処理
     match = re.match(r"^(.+?)さん下げて$", message.content)
     if match:
         target_user = match.group(1).strip()
@@ -24,7 +48,7 @@ async def on_message(message):
                 await message.channel.send(f"⚠️ {target_user} さんのカウントはすでに 0 です！")
         return
 
-    # 🏷️ **ラーメン投稿処理（フォーマット外は無視）**
+    # 🏷️ ラーメン投稿の処理（フォーマット外は無視）
     if message.channel.name == "🍜｜ラーメン投稿":
         content = message.content
 
@@ -107,3 +131,5 @@ async def on_message(message):
 
     # **他のコマンドを正しく処理するための記述**
     await bot.process_commands(message)
+
+bot.run(TOKEN)
