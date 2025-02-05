@@ -57,12 +57,12 @@ async def on_message(message):
             return  # **フォーマットが違うメッセージは無視！**
 
         match = re.search(
-            r"📍 店舗名:\s*(.*?)\n?"
-            r"(?:🍜 ラーメン名:\s*(.*?)\n?)?"
-            r"(?:🏠 場所:\s*(.*?)\n?)?"
-            r"(?:🍳 カスタマイズ:\s*(.*?)\n?)?"
-            r"(?:📝 感想:\s*\n?(.*?))?"
-            r"(?:⭐ 評価:\s*(.*?))?",
+            r"📍 店舗名:\s*(.+?)\n+"
+            r"🍜 ラーメン名:\s*(.+?)\n+"
+            r"🏠 場所:\s*((?:.+\n?)*)"
+            r"🍳 カスタマイズ:\s*(.+?)\n+"
+            r"📝 感想:\s*((?:.+\n?)*)"
+            r"⭐ 評価:\s*(\d+)",
             content,
             re.DOTALL
         )
@@ -71,15 +71,15 @@ async def on_message(message):
             return  # **フォーマットが崩れている場合は無視！**
 
         # **各項目を取得**
-        store_name = match.group(1).strip() if match.group(1) else "不明"
-        ramen_name = match.group(2).strip() if match.group(2) else "不明"
-        location = match.group(3).strip() if match.group(3) else "不明"
-        customization = match.group(4).strip() if match.group(4) else "なし"
-        review = match.group(5).strip() if match.group(5) else "なし"
-        rating_text = match.group(6).strip() if match.group(6) else None
+        store_name = match.group(1).strip()
+        ramen_name = match.group(2).strip()
+        location = match.group(3).strip().replace("\n", " ")  # 場所の改行をスペースに
+        customization = match.group(4).strip()
+        review = match.group(5).strip().replace("\n", "\n")  # 感想は改行をそのまま維持
+        rating_text = match.group(6).strip()
 
         # **評価のチェック**
-        if rating_text and rating_text.isdigit():
+        if rating_text.isdigit():
             rating = int(rating_text)
             if rating < 1 or rating > 5:
                 await message.channel.send(f"⚠️ {user} さん、評価は 1 〜 5 の間で入力してください！")
